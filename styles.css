@@ -1,130 +1,115 @@
+/* 기본 스타일 */
 #miniscreen {
-  /*위치*/
   position: fixed;
   bottom: 10px;
-  right: 10px;
+  left: 75%; /* right 대신 left로 변경. 100% - width - 간격 */
   z-index: 9999;
-
-  /*박스 모델*/
   width: 25%;
+  min-width: 300px;
   height: 80%;
+  min-height: 400px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   border: 1px solid black;
   border-radius: 8px;
-
-  /*배경*/
   background-color: white;
-
-  /*기타*/
   overflow: hidden;
-
-  /*레이아웃*/
   display: flex;
   flex-direction: column;
 }
 
+/* 나머지 스타일은 동일하게 유지 */
 .mini-screen-header {
-  /*박스모델*/
   border-bottom: 1px solid #ccc;
   padding: 10px;
-  /*배경*/
   background-color: #f1f1f1;
-  /*레이아웃*/
-  align-items: center;
   display: flex;
-  justify-content: space-between;
-  text-align: center;
+  align-items: center;
+  min-height: 50px;
+  gap: 5px;
 }
 
 #url-input {
-  /*박스모델*/
-  flex-grow: 1;
-  padding: 8px 12px;
+  flex: 1;
+  min-width: 120px;
+  padding: 8px;
   border: 1px solid #ccc;
   border-radius: 4px;
-  margin-right: 10px;
-  /*폰트 및 텍스트*/
   font-size: 14px;
   color: black;
 }
 
 .button-with-icon {
-  /* 레이아웃 */
   display: flex;
   align-items: center;
   justify-content: center;
-
-  /* 박스 모델 */
-  padding: 8px 12px;
+  padding: 8px;
   border: none;
   border-radius: 4px;
-  margin-left: 10px;
-  flex-grow: 0;
-
-  /* 배경 및 텍스트 */
+  flex-shrink: 0;
   background-color: #819c82;
   color: white;
   font-size: 14px;
-
-  /* 기타 */
   cursor: pointer;
+  white-space: nowrap;
+  min-width: 32px;
+  min-height: 32px;
 }
 
 .button-with-icon:hover {
-  /* 배경 */
   background-color: #0c4d0e;
 }
 
 #close-button {
-  /* 배경 */
   background-color: #c04f4f;
 }
 
 #close-button:hover {
-  /* 배경 */
   background-color: #5b130e;
 }
 
 #mini-iframe {
-  /* 레이아웃 및 박스 모델*/
-  flex-grow: 1;
+  flex: 1;
   border: none;
+  width: 100%;
+  min-height: 200px;
 }
 
-.bookmark-list {
-  /* 리스트 스타일 및 박스 모델 */
-  list-style-type: none;
-  padding: 0;
-  margin: 0;
+/* 태블릿 디바이스 (768px 이하) */
+@media screen and (max-width: 768px) {
+  #miniscreen {
+    left: 30%; /* 100% - 70% - 간격 */
+    width: 70%;
+    height: 70%;
+  }
 }
 
-.bookmark-list li {
-  /* 레이아웃 */
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+/* 모바일 디바이스 (480px 이하) */
+@media screen and (max-width: 480px) {
+  #miniscreen {
+    left: 5%; /* 100% - 90% - 간격 */
+    width: 90%;
+    height: 60%;
+    bottom: 5px;
+  }
 
-  /* 박스 모델 */
-  padding: 8px 12px;
-  border-bottom: 1px solid #ccc;
+  .mini-screen-header {
+    padding: 5px;
+    min-height: 45px;
+  }
 
-  /* 배경 및 텍스트 */
-  color: black;
-
-  /* 기타 */
-  cursor: pointer;
+  .button-with-icon {
+    min-width: 28px;
+    min-height: 28px;
+    padding: 4px;
+    font-size: 12px;
+  }
 }
 
-.bookmark-list li:hover {
-  /* 배경 */
-  background-color: #f1f1f1;
-}
-
-.bookmark-list li button {
-  /* 박스 모델 */
-  margin-left: 10px;
-  padding: 4px 8px;
-
-  /* 텍스트 */
-  font-size: 12px;
+/* 매우 작은 화면 (320px 이하) */
+@media screen and (max-width: 320px) {
+  #miniscreen {
+    left: 2.5%; /* 100% - 95% - 간격 */
+    width: 95%;
+    min-width: 250px;
+  }
 }
