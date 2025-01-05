@@ -2,7 +2,7 @@
 #miniscreen {
   position: fixed;
   bottom: 10px;
-  left: 75%; /* right 대신 left로 변경. 100% - width - 간격 */
+  left: 74%;
   z-index: 9999;
   width: 25%;
   min-width: 300px;
@@ -15,9 +15,10 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  transition: all 0.3s ease;
 }
 
-/* 나머지 스타일은 동일하게 유지 */
+/* 헤더 스타일 */
 .mini-screen-header {
   border-bottom: 1px solid #ccc;
   padding: 10px;
@@ -36,6 +37,7 @@
   border-radius: 4px;
   font-size: 14px;
   color: black;
+  transition: all 0.2s ease;
 }
 
 .button-with-icon {
@@ -53,10 +55,12 @@
   white-space: nowrap;
   min-width: 32px;
   min-height: 32px;
+  transition: all 0.2s ease;
 }
 
 .button-with-icon:hover {
   background-color: #0c4d0e;
+  transform: scale(1.05);
 }
 
 #close-button {
@@ -74,19 +78,84 @@
   min-height: 200px;
 }
 
+/* 일반적인 데스크탑 창 모드 대응 */
+@media screen and (max-width: 1440px) {
+  #miniscreen {
+    left: 60%;
+    width: 35%;
+    height: 85%;
+    min-width: 320px;
+  }
+}
+
+/* 더 작은 데스크탑 창 (1200px 이하) */
+@media screen and (max-width: 1200px) {
+  #miniscreen {
+    left: 50%;
+    width: 45%;
+    height: 80%;
+    min-width: 300px;
+  }
+}
+
+/* 큰 태블릿 디바이스 (1024px 이하) */
+@media screen and (max-width: 1024px) {
+  #miniscreen {
+    left: 35%;
+    width: 65%;
+    height: 75%;
+  }
+  
+  #url-input {
+    font-size: 15px;
+    padding: 10px;
+  }
+}
+
 /* 태블릿 디바이스 (768px 이하) */
 @media screen and (max-width: 768px) {
   #miniscreen {
-    left: 30%; /* 100% - 70% - 간격 */
-    width: 70%;
+    left: 25%;
+    width: 75%;
     height: 70%;
+  }
+
+  .mini-screen-header {
+    padding: 8px;
+  }
+
+  #url-input {
+    font-size: 14px;
+  }
+}
+
+/* 큰 모바일 디바이스 (600px 이하) */
+@media screen and (max-width: 600px) {
+  #miniscreen {
+    left: 10%;
+    width: 80%;
+    height: 65%;
+    min-width: 280px;
+  }
+
+  .mini-screen-header {
+    padding: 6px;
+    min-height: 45px;
+    gap: 4px;
+  }
+
+  .button-with-icon {
+    min-width: 30px;
+    min-height: 30px;
+    padding: 6px;
+    font-size: 13px;
   }
 }
 
 /* 모바일 디바이스 (480px 이하) */
 @media screen and (max-width: 480px) {
   #miniscreen {
-    left: 5%; /* 100% - 90% - 간격 */
+    left: 5%;
     width: 90%;
     height: 60%;
     bottom: 5px;
@@ -94,7 +163,14 @@
 
   .mini-screen-header {
     padding: 5px;
-    min-height: 45px;
+    min-height: 42px;
+    gap: 3px;
+  }
+
+  #url-input {
+    padding: 6px;
+    font-size: 13px;
+    min-width: 100px;
   }
 
   .button-with-icon {
@@ -108,8 +184,38 @@
 /* 매우 작은 화면 (320px 이하) */
 @media screen and (max-width: 320px) {
   #miniscreen {
-    left: 2.5%; /* 100% - 95% - 간격 */
+    left: 2.5%;
     width: 95%;
+    height: 55%;
     min-width: 250px;
+    min-height: 350px;
+  }
+
+  .mini-screen-header {
+    min-height: 40px;
+    padding: 4px;
+    gap: 2px;
+  }
+
+  #url-input {
+    padding: 5px;
+    font-size: 12px;
+    min-width: 90px;
+  }
+
+  .button-with-icon {
+    min-width: 26px;
+    min-height: 26px;
+    padding: 3px;
+    font-size: 11px;
   }
 }
+
+/* 가로 모드 대응 */
+@media screen and (max-height: 600px) {
+  #miniscreen {
+    height: 90%;
+    min-height: 300px;
+  }
+}
+
