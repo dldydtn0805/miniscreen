@@ -1,3 +1,5 @@
+//manifest.json
+
 {
   "manifest_version": 3,
   "name": "MINISCREEN",
@@ -23,3 +25,4 @@
     "128": "icon128.png"
   }
 }
+
