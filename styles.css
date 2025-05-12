@@ -63,11 +63,11 @@
   transform: scale(1.05);
 }
 
-#toggle-button {
+#close-button {
   background-color: #c04f4f;
 }
 
-#toggle-button:hover {
+#close-button:hover {
   background-color: #5b130e;
 }
 
