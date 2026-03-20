@@ -43,7 +43,8 @@
 
 #miniscreen[data-view-mode="desktop"] {
   width: min(68vw, 980px);
-  min-width: 560px;
+  min-width: 280px;
+  min-height: 200px;
 }
 
 #miniscreen.hidden {

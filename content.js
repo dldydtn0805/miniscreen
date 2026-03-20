@@ -71,6 +71,22 @@ function init() {
       currentViewMode === "mobile" ? "Mobile view" : "Desktop web view";
   }
 
+  function getSizeConstraints() {
+    const margin = 12;
+    const { minWidth, minHeight } =
+      currentViewMode === "desktop"
+        ? { minWidth: 280, minHeight: 200 }
+        : { minWidth: 280, minHeight: 320 };
+
+    return {
+      margin,
+      minWidth,
+      minHeight,
+      maxWidth: Math.max(minWidth, window.innerWidth - margin * 2),
+      maxHeight: Math.max(minHeight, window.innerHeight - margin * 2),
+    };
+  }
+
   function resetMiniScreenPosition() {
     miniScreen.style.left = "";
     miniScreen.style.top = "50%";
@@ -79,15 +95,16 @@ function init() {
   }
 
   function constrainMiniScreenToViewport() {
-    const margin = 12;
+    const { margin, minWidth, minHeight, maxWidth, maxHeight } =
+      getSizeConstraints();
     const currentRect = miniScreen.getBoundingClientRect();
     const nextWidth = Math.min(
-      Math.max(currentRect.width, 280),
-      window.innerWidth - margin * 2
+      Math.max(currentRect.width, minWidth),
+      maxWidth
     );
     const nextHeight = Math.min(
-      Math.max(currentRect.height, 320),
-      window.innerHeight - margin * 2
+      Math.max(currentRect.height, minHeight),
+      maxHeight
     );
 
     let nextLeft = currentRect.left;
@@ -293,10 +310,7 @@ function init() {
     const startHeight = miniScreen.offsetHeight;
     const startX = event.clientX;
     const startY = event.clientY;
-    const minWidth = 280;
-    const minHeight = 320;
-    const maxWidth = window.innerWidth - 16;
-    const maxHeight = window.innerHeight - 16;
+    const { minWidth, minHeight, maxWidth, maxHeight } = getSizeConstraints();
 
     const onMouseMove = (moveEvent) => {
       const nextWidth = Math.min(
