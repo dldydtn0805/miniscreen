@@ -14,10 +14,6 @@
     );
   };
 
-  window.addEventListener("load", postFrameLocation);
-  window.addEventListener("pageshow", postFrameLocation);
-  window.addEventListener("hashchange", postFrameLocation);
-
   const navigateWithinFrame = (url) => {
     if (!url) {
       return;
@@ -39,6 +35,10 @@
       return returnValue;
     };
   };
+
+  window.addEventListener("load", postFrameLocation);
+  window.addEventListener("pageshow", postFrameLocation);
+  window.addEventListener("hashchange", postFrameLocation);
 
   wrapHistoryMethod("pushState");
   wrapHistoryMethod("replaceState");
@@ -71,11 +71,7 @@
 
       const target = (link.getAttribute("target") || "").toLowerCase();
 
-      if (
-        target === "_top" ||
-        target === "_parent" ||
-        target === "_blank"
-      ) {
+      if (target === "_top" || target === "_parent" || target === "_blank") {
         event.preventDefault();
         navigateWithinFrame(link.href);
       }

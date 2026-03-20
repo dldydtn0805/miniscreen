@@ -490,7 +490,7 @@
     width: 65%;
     height: 75%;
   }
-  
+
   #url-input {
     font-size: 15px;
     padding: 10px;
@@ -518,81 +518,5 @@
     left: 10%;
     width: 80%;
     height: 65%;
-    min-width: 280px;
-    border-radius: 20px;
-  }
-
-  .mini-screen-header {
-    padding: 6px;
-    min-height: 45px;
-    gap: 4px;
-  }
-
-  .button-with-icon {
-    width: 30px;
-    height: 30px;
-    font-size: 11px;
-  }
-}
-
-@media screen and (max-width: 480px) {
-  #miniscreen {
-    left: 5%;
-    width: 90%;
-    height: 60%;
-    bottom: 5px;
-  }
-
-  .mini-screen-header {
-    padding: 5px;
-    min-height: 42px;
-    gap: 3px;
-  }
-
-  #url-input {
-    padding: 6px;
-    font-size: 13px;
-    min-width: 100px;
-  }
-
-  .button-with-icon {
-    width: 28px;
-    height: 28px;
-    font-size: 10px;
-  }
-}
-
-@media screen and (max-width: 320px) {
-  #miniscreen {
-    left: 2.5%;
-    width: 95%;
-    height: 55%;
-    min-width: 250px;
-    min-height: 350px;
-  }
-
-  .mini-screen-header {
-    min-height: 40px;
-    padding: 4px;
-    gap: 2px;
-  }
-
-  #url-input {
-    padding: 5px;
-    font-size: 12px;
-    min-width: 90px;
-  }
-
-  .button-with-icon {
-    width: 26px;
-    height: 26px;
-    font-size: 10px;
-  }
-}
-
-@media screen and (max-height: 600px) {
-  #miniscreen {
-    height: 90%;
-    min-height: 300px;
   }
 }

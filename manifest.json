@@ -6,16 +6,17 @@
   "permissions": ["scripting", "storage", "declarativeNetRequest"],
   "host_permissions": ["<all_urls>"],
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "src/background/index.js",
+    "type": "module"
   },
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "css": ["styles.css"]
+      "css": ["src/content/styles.css"]
     },
     {
       "matches": ["<all_urls>"],
-      "js": ["frame-tracker.js"],
+      "js": ["src/frame-tracker/index.js"],
       "all_frames": true,
       "run_at": "document_idle"
     }
