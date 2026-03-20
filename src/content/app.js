@@ -8,6 +8,7 @@
 
   const { fallbackHomeUrl, defaultViewMode } = state.constants;
   const { normalizeTargetUrl, getBookmarkTitle } = state.utils;
+  const storage = state.storage;
   const elements = state.dom.createMiniScreen();
   const appState = {
     bookmarks: [],
@@ -36,13 +37,11 @@
       appState.currentViewMode === "mobile" ? "Mobile view" : "Desktop web view";
   };
 
-  const loadHome = () => {
-    chrome.storage.sync.get(["home"], (result) => {
-      const defaultUrl = result.home || fallbackHomeUrl;
-      appState.currentUrl = defaultUrl;
-      appState.currentTitle = getBookmarkTitle(defaultUrl);
-      elements.iframe.src = defaultUrl;
-    });
+  const loadHome = async () => {
+    const homeUrl = await storage.getHome();
+    appState.currentUrl = homeUrl;
+    appState.currentTitle = getBookmarkTitle(homeUrl);
+    elements.iframe.src = homeUrl;
   };
 
   const navigateTo = (targetUrl) => {
@@ -72,17 +71,16 @@
     loadHome();
   });
 
-  elements.homeButton.addEventListener("contextmenu", (event) => {
+  elements.homeButton.addEventListener("contextmenu", async (event) => {
     event.preventDefault();
 
     const targetUrl = elements.urlInput.value
       ? normalizeTargetUrl(elements.urlInput.value)
       : appState.currentUrl;
 
-    chrome.storage.sync.set({ home: targetUrl }, () => {
-      elements.urlInput.value = "";
-      navigateTo(targetUrl);
-    });
+    await storage.setHome(targetUrl);
+    elements.urlInput.value = "";
+    navigateTo(targetUrl);
   });
 
   elements.bookmarkButton.addEventListener("click", () => {
@@ -176,8 +174,8 @@
     }
   });
 
-  chrome.storage.sync.get(["viewMode"], (result) => {
-    applyViewMode(result.viewMode || defaultViewMode);
+  storage.getViewMode().then((viewMode) => {
+    applyViewMode(viewMode || defaultViewMode);
     layout.constrainMiniScreenToViewport();
   });
 

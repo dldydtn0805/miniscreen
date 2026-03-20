@@ -4,6 +4,7 @@ const CONTENT_SCRIPT_FILES = [
   "src/content/constants.js",
   "src/content/utils.js",
   "src/content/dom.js",
+  "src/content/storage.js",
   "src/content/bookmarks.js",
   "src/content/layout.js",
   "src/content/app.js",

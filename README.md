@@ -113,6 +113,7 @@ MINISCREEN/
 │   │   ├── constants.js         # content 레이어 상수
 │   │   ├── dom.js               # 오버레이 템플릿과 DOM 참조 수집
 │   │   ├── layout.js            # 드래그, 리사이즈, viewport 보정
+│   │   ├── storage.js           # chrome.storage 접근 래퍼
 │   │   ├── styles.css           # 오버레이 UI 스타일
 │   │   └── utils.js             # URL 정규화와 제목 유틸
 │   └── frame-tracker/
@@ -137,6 +138,7 @@ MINISCREEN/
 - `dom.js`: `#miniscreen` 오버레이 템플릿과 DOM 조회
 - `bookmarks.js`: 북마크 목록 렌더링, 추가/수정/삭제
 - `layout.js`: 드래그 이동, 리사이즈, viewport 보정
+- `storage.js`: 홈 URL, 북마크, 뷰 모드 저장소 접근 캡슐화
 - `constants.js`, `utils.js`: 공통 상수와 URL/제목 유틸
 
 ### src/frame-tracker

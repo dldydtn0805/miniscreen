@@ -3,6 +3,7 @@
     globalThis.MINISCREEN_CONTENT || {});
   const { getBookmarkTitle } = state.utils;
   const { maxBookmarks } = state.constants;
+  const storage = state.storage;
 
   function createBookmarkStore(context) {
     const { elements, appState } = context;
@@ -18,7 +19,7 @@
         const item = document.createElement("div");
         item.className = "bookmark-item";
 
-        const saveBookmarkTitle = (nextTitle) => {
+        const saveBookmarkTitle = async (nextTitle) => {
           const trimmedTitle = nextTitle.trim();
 
           if (!trimmedTitle) {
@@ -31,7 +32,8 @@
             bookmarkIndex === index ? { ...entry, title: trimmedTitle } : entry
           );
           editingBookmarkIndex = null;
-          chrome.storage.sync.set({ bookmarks: appState.bookmarks }, renderBookmarks);
+          await storage.saveBookmarks(appState.bookmarks);
+          renderBookmarks();
         };
 
         if (editingBookmarkIndex === index) {
@@ -99,7 +101,7 @@
           appState.bookmarks = appState.bookmarks.filter(
             (_, bookmarkIndex) => bookmarkIndex !== index
           );
-          chrome.storage.sync.set({ bookmarks: appState.bookmarks }, renderBookmarks);
+          storage.saveBookmarks(appState.bookmarks).then(renderBookmarks);
         });
 
         const editButton = document.createElement("button");
@@ -122,13 +124,9 @@
     return {
       renderBookmarks,
 
-      loadBookmarks() {
-        chrome.storage.sync.get(["bookmarks"], (result) => {
-          appState.bookmarks = Array.isArray(result.bookmarks)
-            ? result.bookmarks
-            : [];
-          renderBookmarks();
-        });
+      async loadBookmarks() {
+        appState.bookmarks = await storage.getBookmarks();
+        renderBookmarks();
       },
 
       addCurrentBookmark() {
@@ -152,7 +150,7 @@
           ...appState.bookmarks,
         ].slice(0, maxBookmarks);
 
-        chrome.storage.sync.set({ bookmarks: appState.bookmarks }, renderBookmarks);
+        storage.saveBookmarks(appState.bookmarks).then(renderBookmarks);
       },
     };
   }
