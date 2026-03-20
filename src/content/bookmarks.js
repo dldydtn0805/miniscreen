@@ -1,12 +1,9 @@
 (function () {
   const state = (globalThis.MINISCREEN_CONTENT =
     globalThis.MINISCREEN_CONTENT || {});
-  const { getBookmarkTitle } = state.utils;
-  const { maxBookmarks } = state.constants;
-  const storage = state.storage;
 
   function createBookmarkStore(context) {
-    const { elements, appState } = context;
+    const { elements, appState, services } = context;
     let editingBookmarkIndex = null;
 
     const renderBookmarks = () => {
@@ -20,19 +17,15 @@
         item.className = "bookmark-item";
 
         const saveBookmarkTitle = async (nextTitle) => {
-          const trimmedTitle = nextTitle.trim();
+          const saved = await services.renameBookmark(index, nextTitle);
 
-          if (!trimmedTitle) {
+          if (!saved) {
             editingBookmarkIndex = null;
             renderBookmarks();
             return;
           }
 
-          appState.bookmarks = appState.bookmarks.map((entry, bookmarkIndex) =>
-            bookmarkIndex === index ? { ...entry, title: trimmedTitle } : entry
-          );
           editingBookmarkIndex = null;
-          await storage.saveBookmarks(appState.bookmarks);
           renderBookmarks();
         };
 
@@ -85,11 +78,7 @@
         openButton.textContent = bookmark.title;
         openButton.title = bookmark.url;
         openButton.addEventListener("click", () => {
-          appState.currentUrl = bookmark.url;
-          appState.currentTitle = bookmark.title;
-          elements.iframe.src = bookmark.url;
-          elements.bookmarkPanel.classList.add("hidden");
-          elements.bookmarkButton.classList.remove("is-active");
+          services.openBookmark(bookmark);
         });
 
         const removeButton = document.createElement("button");
@@ -97,11 +86,9 @@
         removeButton.className = "bookmark-remove";
         removeButton.textContent = "-";
         removeButton.setAttribute("aria-label", "Remove bookmark");
-        removeButton.addEventListener("click", () => {
-          appState.bookmarks = appState.bookmarks.filter(
-            (_, bookmarkIndex) => bookmarkIndex !== index
-          );
-          storage.saveBookmarks(appState.bookmarks).then(renderBookmarks);
+        removeButton.addEventListener("click", async () => {
+          await services.removeBookmark(index);
+          renderBookmarks();
         });
 
         const editButton = document.createElement("button");
@@ -125,32 +112,13 @@
       renderBookmarks,
 
       async loadBookmarks() {
-        appState.bookmarks = await storage.getBookmarks();
+        await services.loadBookmarks();
         renderBookmarks();
       },
 
-      addCurrentBookmark() {
-        const targetUrl = appState.currentUrl || elements.iframe.src;
-
-        if (!targetUrl) {
-          return;
-        }
-
-        if (appState.bookmarks.some((bookmark) => bookmark.url === targetUrl)) {
-          elements.bookmarkPanel.classList.add("hidden");
-          elements.bookmarkButton.classList.remove("is-active");
-          return;
-        }
-
-        appState.bookmarks = [
-          {
-            title: appState.currentTitle || getBookmarkTitle(targetUrl),
-            url: targetUrl,
-          },
-          ...appState.bookmarks,
-        ].slice(0, maxBookmarks);
-
-        storage.saveBookmarks(appState.bookmarks).then(renderBookmarks);
+      async addCurrentBookmark() {
+        await services.addCurrentBookmark();
+        renderBookmarks();
       },
     };
   }

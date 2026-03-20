@@ -7,6 +7,7 @@ const CONTENT_SCRIPT_FILES = [
   "src/content/dom.js",
   "src/content/storage.js",
   "src/content/runtime.js",
+  "src/content/services.js",
   "src/content/bookmarks.js",
   "src/content/layout.js",
   "src/content/app.js",

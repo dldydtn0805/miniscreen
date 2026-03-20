@@ -8,8 +8,6 @@
 
   const { fallbackHomeUrl, defaultViewMode } = state.constants;
   const { normalizeTargetUrl, getBookmarkTitle } = state.utils;
-  const storage = state.storage;
-  const runtime = state.runtime;
   const elements = state.dom.createMiniScreen();
   const appState = {
     bookmarks: [],
@@ -19,9 +17,7 @@
     isComposing: false,
   };
 
-  const bookmarkStore = state.bookmarks.createBookmarkStore({ elements, appState });
   const layout = state.layout.createLayoutController({ elements, appState });
-  document.body.appendChild(elements.miniScreen);
 
   const applyViewMode = (viewMode) => {
     appState.currentViewMode = viewMode === "desktop" ? "desktop" : "mobile";
@@ -38,28 +34,28 @@
       appState.currentViewMode === "mobile" ? "Mobile view" : "Desktop web view";
   };
 
-  const loadHome = async () => {
-    const homeUrl = await storage.getHome();
-    appState.currentUrl = homeUrl;
-    appState.currentTitle = getBookmarkTitle(homeUrl);
-    elements.iframe.src = homeUrl;
-  };
-
-  const navigateTo = (targetUrl) => {
-    appState.currentUrl = targetUrl;
-    appState.currentTitle = getBookmarkTitle(targetUrl);
-    elements.iframe.src = targetUrl;
-  };
+  const services = state.services.createMiniScreenService({
+    appState,
+    elements,
+    applyViewMode,
+    layout,
+  });
+  const bookmarkStore = state.bookmarks.createBookmarkStore({
+    elements,
+    appState,
+    services,
+  });
+  document.body.appendChild(elements.miniScreen);
 
   const navigateToInputValue = () => {
     if (!elements.urlInput.value) {
-      loadHome();
+      services.loadHome();
       return;
     }
 
     const targetUrl = normalizeTargetUrl(elements.urlInput.value);
     elements.urlInput.value = "";
-    navigateTo(targetUrl);
+    services.navigateTo(targetUrl);
   };
 
   elements.backButton.addEventListener("click", () => {
@@ -69,7 +65,7 @@
   elements.goButton.addEventListener("click", navigateToInputValue);
 
   elements.homeButton.addEventListener("click", () => {
-    loadHome();
+    services.loadHome();
   });
 
   elements.homeButton.addEventListener("contextmenu", async (event) => {
@@ -79,9 +75,8 @@
       ? normalizeTargetUrl(elements.urlInput.value)
       : appState.currentUrl;
 
-    await storage.setHome(targetUrl);
     elements.urlInput.value = "";
-    navigateTo(targetUrl);
+    await services.saveHome(targetUrl);
   });
 
   elements.bookmarkButton.addEventListener("click", () => {
@@ -92,8 +87,8 @@
     );
   });
 
-  elements.addBookmarkButton.addEventListener("click", () => {
-    bookmarkStore.addCurrentBookmark();
+  elements.addBookmarkButton.addEventListener("click", async () => {
+    await bookmarkStore.addCurrentBookmark();
   });
 
   document.addEventListener("mousedown", (event) => {
@@ -131,19 +126,7 @@
   });
 
   elements.viewModeButton.addEventListener("click", async () => {
-    const nextViewMode =
-      appState.currentViewMode === "mobile" ? "desktop" : "mobile";
-
-    const updatedViewMode = await runtime.setViewMode(nextViewMode);
-
-    if (!updatedViewMode) {
-      return;
-    }
-
-    applyViewMode(updatedViewMode);
-    layout.constrainMiniScreenToViewport();
-    elements.iframe.src =
-      appState.currentUrl || elements.iframe.src || fallbackHomeUrl;
+    await services.toggleViewMode();
   });
 
   elements.iframe.addEventListener("load", () => {
@@ -169,11 +152,8 @@
     }
   });
 
-  storage.getViewMode().then((viewMode) => {
-    applyViewMode(viewMode || defaultViewMode);
-    layout.constrainMiniScreenToViewport();
-  });
+  services.loadViewMode();
 
   bookmarkStore.loadBookmarks();
-  loadHome();
+  services.loadHome();
 })();
