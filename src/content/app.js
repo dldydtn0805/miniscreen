@@ -9,6 +9,7 @@
   const { fallbackHomeUrl, defaultViewMode } = state.constants;
   const { normalizeTargetUrl, getBookmarkTitle } = state.utils;
   const storage = state.storage;
+  const runtime = state.runtime;
   const elements = state.dom.createMiniScreen();
   const appState = {
     bookmarks: [],
@@ -129,26 +130,20 @@
     elements.miniScreen.remove();
   });
 
-  elements.viewModeButton.addEventListener("click", () => {
+  elements.viewModeButton.addEventListener("click", async () => {
     const nextViewMode =
       appState.currentViewMode === "mobile" ? "desktop" : "mobile";
 
-    chrome.runtime.sendMessage(
-      {
-        type: "MINISCREEN_SET_VIEW_MODE",
-        viewMode: nextViewMode,
-      },
-      (response) => {
-        if (chrome.runtime.lastError || !response?.ok) {
-          return;
-        }
+    const updatedViewMode = await runtime.setViewMode(nextViewMode);
 
-        applyViewMode(response.viewMode);
-        layout.constrainMiniScreenToViewport();
-        elements.iframe.src =
-          appState.currentUrl || elements.iframe.src || fallbackHomeUrl;
-      }
-    );
+    if (!updatedViewMode) {
+      return;
+    }
+
+    applyViewMode(updatedViewMode);
+    layout.constrainMiniScreenToViewport();
+    elements.iframe.src =
+      appState.currentUrl || elements.iframe.src || fallbackHomeUrl;
   });
 
   elements.iframe.addEventListener("load", () => {

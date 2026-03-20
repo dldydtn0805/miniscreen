@@ -106,6 +106,7 @@ MINISCREEN/
 ├── src/
 │   ├── background/
 │   │   ├── index.js             # 서비스 워커 진입점, content 스크립트 주입
+│   │   ├── messages.js          # runtime 메시지 처리
 │   │   └── rules.js             # 뷰 모드별 동적 네트워크 규칙
 │   ├── content/
 │   │   ├── app.js               # 오버레이 초기화와 이벤트 연결
@@ -113,6 +114,7 @@ MINISCREEN/
 │   │   ├── constants.js         # content 레이어 상수
 │   │   ├── dom.js               # 오버레이 템플릿과 DOM 참조 수집
 │   │   ├── layout.js            # 드래그, 리사이즈, viewport 보정
+│   │   ├── runtime.js           # background 메시지 호출 래퍼
 │   │   ├── storage.js           # chrome.storage 접근 래퍼
 │   │   ├── styles.css           # 오버레이 UI 스타일
 │   │   └── utils.js             # URL 정규화와 제목 유틸
@@ -128,6 +130,7 @@ MINISCREEN/
 ### src/background
 
 - `index.js`: 확장 아이콘 클릭 시 content 레이어 파일들을 순서대로 현재 탭에 주입
+- `messages.js`: content에서 보낸 runtime 메시지 처리
 - `rules.js`: `declarativeNetRequest` 동적 규칙 생성과 적용 담당
 - 모바일 뷰일 때 서브프레임 요청에 모바일 User-Agent 적용
 - 뷰 모드 변경 메시지를 받아 저장하고 규칙 갱신
@@ -138,6 +141,7 @@ MINISCREEN/
 - `dom.js`: `#miniscreen` 오버레이 템플릿과 DOM 조회
 - `bookmarks.js`: 북마크 목록 렌더링, 추가/수정/삭제
 - `layout.js`: 드래그 이동, 리사이즈, viewport 보정
+- `runtime.js`: background runtime 메시지 호출 캡슐화
 - `storage.js`: 홈 URL, 북마크, 뷰 모드 저장소 접근 캡슐화
 - `constants.js`, `utils.js`: 공통 상수와 URL/제목 유틸
 
