@@ -1,74 +1,193 @@
-/* 기본 스타일 */
+:root {
+  --ms-surface: rgba(255, 255, 255, 0.78);
+  --ms-surface-strong: rgba(255, 255, 255, 0.92);
+  --ms-border: rgba(29, 29, 31, 0.08);
+  --ms-shadow: 0 22px 54px rgba(0, 0, 0, 0.14);
+  --ms-shadow-active: 0 28px 68px rgba(0, 0, 0, 0.18);
+  --ms-text: #1d1d1f;
+  --ms-muted: #6e6e73;
+  --ms-button: rgba(255, 255, 255, 0.72);
+  --ms-button-hover: rgba(255, 255, 255, 0.9);
+  --ms-accent: #0071e3;
+  --ms-accent-soft: rgba(0, 113, 227, 0.14);
+  --ms-button-text: #1d1d1f;
+  --ms-button-border: rgba(29, 29, 31, 0.08);
+  --ms-button-shadow: 0 8px 18px rgba(0, 0, 0, 0.06);
+}
+
 #miniscreen {
   position: fixed;
-  bottom: 10px;
+  top: 50%;
   left: 74%;
+  bottom: auto;
   z-index: 9999;
   width: 25%;
   min-width: 300px;
   height: 80%;
   min-height: 400px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  border: 1px solid black;
-  border-radius: 8px;
-  background-color: white;
+  border: 1px solid var(--ms-border);
+  border-radius: 24px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(245, 245, 247, 0.76)),
+    var(--ms-surface);
+  box-shadow: var(--ms-shadow);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  transition: all 0.3s ease;
+  will-change: left, top, width, height;
+  transform: translateY(-50%);
+  transition: box-shadow 0.2s ease;
 }
 
-/* 헤더 스타일 */
+#miniscreen[data-view-mode="desktop"] {
+  width: min(68vw, 980px);
+  min-width: 560px;
+}
+
+#miniscreen.hidden {
+  display: none;
+}
+
+#miniscreen.is-interacting {
+  transition: box-shadow 0.2s ease;
+  user-select: none;
+  box-shadow: var(--ms-shadow-active);
+}
+
+#miniscreen.is-interacting iframe {
+  pointer-events: none;
+}
+
 .mini-screen-header {
-  border-bottom: 1px solid #ccc;
-  padding: 10px;
-  background-color: #f1f1f1;
+  position: relative;
+  padding: 12px 14px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(246, 246, 248, 0.78));
+  border-bottom: 1px solid rgba(29, 29, 31, 0.06);
   display: flex;
   align-items: center;
-  min-height: 50px;
-  gap: 5px;
+  min-height: 58px;
+  gap: 8px;
 }
 
 #url-input {
   flex: 1;
   min-width: 120px;
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  height: 38px;
+  padding: 0 14px;
+  border: 1px solid rgba(29, 29, 31, 0.08);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.76);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.92),
+    0 4px 12px rgba(0, 0, 0, 0.04);
   font-size: 14px;
-  color: black;
-  transition: all 0.2s ease;
+  font-weight: 500;
+  color: var(--ms-text);
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+#url-input::placeholder {
+  color: var(--ms-muted);
+  letter-spacing: 0.02em;
+}
+
+#url-input:focus {
+  border-color: rgba(0, 113, 227, 0.32);
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.12);
 }
 
 .button-with-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 8px;
-  border: none;
-  border-radius: 4px;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 1px solid var(--ms-button-border);
+  border-radius: 999px;
   flex-shrink: 0;
-  background-color: #819c82;
-  color: white;
-  font-size: 14px;
+  background: var(--ms-button);
+  color: var(--ms-button-text);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.92),
+    var(--ms-button-shadow);
+  font-size: 11px;
+  font-weight: 700;
   cursor: pointer;
-  white-space: nowrap;
-  min-width: 32px;
-  min-height: 32px;
-  transition: all 0.2s ease;
+  transition:
+    background-color 0.18s ease,
+    transform 0.18s ease,
+    opacity 0.18s ease,
+    box-shadow 0.18s ease,
+    border-color 0.18s ease;
 }
 
 .button-with-icon:hover {
-  background-color: #0c4d0e;
-  transform: scale(1.05);
+  background: var(--ms-button-hover);
+  transform: translateY(-1px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.96),
+    0 10px 22px rgba(0, 0, 0, 0.08);
 }
 
 #close-button {
-  background-color: #c04f4f;
+  background: rgba(255, 255, 255, 0.72);
 }
 
 #close-button:hover {
-  background-color: #5b130e;
+  background: rgba(255, 255, 255, 0.9);
+}
+
+#home-button {
+  background: rgba(255, 255, 255, 0.72);
+}
+
+#home-button:hover {
+  background: rgba(255, 255, 255, 0.9);
+}
+
+#bookmark-button {
+  background: rgba(255, 248, 235, 0.9);
+  color: #a15c00;
+}
+
+#bookmark-button:hover {
+  background: rgba(255, 244, 224, 0.98);
+}
+
+#bookmark-button.is-active {
+  background: rgba(255, 236, 204, 0.98);
+  border-color: rgba(245, 158, 11, 0.18);
+}
+
+#view-mode-button {
+  background: #0071e3;
+  color: #ffffff;
+  border-color: rgba(0, 113, 227, 0.24);
+}
+
+#view-mode-button:hover {
+  background: #0077ed;
+}
+
+#miniscreen[data-view-mode="desktop"] #view-mode-button {
+  background: #0071e3;
+}
+
+#back-button,
+#go-button,
+#home-button,
+#close-button {
+  color: #3a3a3c;
+}
+
+#back-button:hover,
+#go-button:hover {
+  background: rgba(255, 255, 255, 0.9);
 }
 
 #mini-iframe {
@@ -76,9 +195,276 @@
   border: none;
   width: 100%;
   min-height: 200px;
+  background: var(--ms-surface-strong);
 }
 
-/* 일반적인 데스크탑 창 모드 대응 */
+.bookmark-panel {
+  position: absolute;
+  top: 74px;
+  left: 14px;
+  right: 14px;
+  z-index: 2;
+  padding: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.82);
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at top left, rgba(255, 255, 255, 0.96), transparent 40%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(244, 244, 246, 0.94)),
+    rgba(255, 255, 255, 0.92);
+  box-shadow:
+    0 26px 60px rgba(15, 23, 42, 0.14),
+    0 10px 24px rgba(15, 23, 42, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(34px) saturate(190%);
+  -webkit-backdrop-filter: blur(34px) saturate(190%);
+  transform-origin: top center;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+.bookmark-panel.hidden {
+  display: block;
+  opacity: 0;
+  transform: translateY(-10px) scale(0.98);
+  pointer-events: none;
+}
+
+.bookmark-panel-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding: 2px 2px 12px;
+  border-bottom: 1px solid rgba(29, 29, 31, 0.08);
+}
+
+.bookmark-panel-heading {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.bookmark-panel-eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #86868b;
+}
+
+.bookmark-panel-header strong {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ms-text);
+  letter-spacing: -0.03em;
+}
+
+.bookmark-panel-copy {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.45;
+  color: #6e6e73;
+  max-width: 220px;
+}
+
+#add-bookmark-button {
+  border: 1px solid rgba(29, 29, 31, 0.06);
+  border-radius: 999px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 1), rgba(243, 243, 246, 0.94));
+  color: var(--ms-text);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.98),
+    0 10px 18px rgba(15, 23, 42, 0.08);
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  font-size: 17px;
+  line-height: 1;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    background-color 0.18s ease,
+    border-color 0.18s ease;
+}
+
+#add-bookmark-button:hover {
+  background: rgba(255, 255, 255, 1);
+  transform: translateY(-1px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 1),
+    0 14px 24px rgba(15, 23, 42, 0.1);
+}
+
+.bookmark-empty {
+  padding: 32px 18px 22px;
+  color: #6e6e73;
+  font-size: 13px;
+  text-align: center;
+  line-height: 1.5;
+  border-radius: 22px;
+  background:
+    linear-gradient(180deg, rgba(252, 252, 253, 0.96), rgba(244, 244, 247, 0.9));
+  border: 1px solid rgba(29, 29, 31, 0.05);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.94);
+}
+
+.bookmark-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 268px;
+  overflow-y: auto;
+  padding-right: 4px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(107, 114, 128, 0.28) transparent;
+}
+
+.bookmark-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.bookmark-list::-webkit-scrollbar-thumb {
+  background: rgba(107, 114, 128, 0.24);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+.bookmark-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px;
+  border: 1px solid rgba(29, 29, 31, 0.05);
+  border-radius: 22px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(247, 247, 249, 0.84));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.94),
+    0 8px 22px rgba(15, 23, 42, 0.05);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+.bookmark-link,
+.bookmark-input,
+.bookmark-confirm,
+.bookmark-edit,
+.bookmark-remove {
+  border: 1px solid rgba(29, 29, 31, 0.05);
+  border-radius: 17px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(245, 245, 247, 0.92));
+  color: var(--ms-text);
+  cursor: pointer;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.96),
+    0 8px 18px rgba(15, 23, 42, 0.05);
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    background-color 0.18s ease,
+    border-color 0.18s ease;
+}
+
+.bookmark-link {
+  flex: 1;
+  min-width: 0;
+  padding: 14px 15px;
+  text-align: left;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bookmark-input {
+  flex: 1;
+  min-width: 0;
+  height: 44px;
+  padding: 0 15px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ms-text);
+  outline: none;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 1), rgba(246, 246, 248, 0.94));
+}
+
+.bookmark-input:focus {
+  border-color: rgba(0, 113, 227, 0.22);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 1),
+    0 0 0 4px rgba(0, 113, 227, 0.1);
+}
+
+.bookmark-confirm,
+.bookmark-edit,
+.bookmark-remove {
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  font-size: 15px;
+  line-height: 1;
+  font-weight: 600;
+}
+
+.bookmark-confirm {
+  color: #0071e3;
+  font-size: 16px;
+}
+
+.bookmark-edit {
+  color: var(--ms-text);
+}
+
+.bookmark-remove {
+  color: #ff3b30;
+  font-size: 17px;
+}
+
+.bookmark-item:hover {
+  transform: translateY(-1px);
+  border-color: rgba(29, 29, 31, 0.08);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.96),
+    0 12px 28px rgba(15, 23, 42, 0.08);
+}
+
+.bookmark-link:hover,
+.bookmark-confirm:hover,
+.bookmark-edit:hover,
+.bookmark-remove:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.98),
+    0 12px 22px rgba(15, 23, 42, 0.09);
+}
+
+.bookmark-confirm:hover {
+  border-color: rgba(0, 113, 227, 0.16);
+}
+
+.bookmark-remove:hover {
+  border-color: rgba(255, 59, 48, 0.14);
+}
+
+#resize-handle {
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  width: 20px;
+  height: 20px;
+  cursor: nwse-resize;
+  background:
+    linear-gradient(135deg, transparent 0 48%, rgba(107, 114, 128, 0.5) 48% 56%, transparent 56% 66%, rgba(107, 114, 128, 0.75) 66% 74%, transparent 74%);
+  opacity: 0.9;
+}
+
 @media screen and (max-width: 1440px) {
   #miniscreen {
     left: 60%;
@@ -88,7 +474,6 @@
   }
 }
 
-/* 더 작은 데스크탑 창 (1200px 이하) */
 @media screen and (max-width: 1200px) {
   #miniscreen {
     left: 50%;
@@ -98,7 +483,6 @@
   }
 }
 
-/* 큰 태블릿 디바이스 (1024px 이하) */
 @media screen and (max-width: 1024px) {
   #miniscreen {
     left: 35%;
@@ -112,7 +496,6 @@
   }
 }
 
-/* 태블릿 디바이스 (768px 이하) */
 @media screen and (max-width: 768px) {
   #miniscreen {
     left: 25%;
@@ -129,13 +512,13 @@
   }
 }
 
-/* 큰 모바일 디바이스 (600px 이하) */
 @media screen and (max-width: 600px) {
   #miniscreen {
     left: 10%;
     width: 80%;
     height: 65%;
     min-width: 280px;
+    border-radius: 20px;
   }
 
   .mini-screen-header {
@@ -145,14 +528,12 @@
   }
 
   .button-with-icon {
-    min-width: 30px;
-    min-height: 30px;
-    padding: 6px;
-    font-size: 13px;
+    width: 30px;
+    height: 30px;
+    font-size: 11px;
   }
 }
 
-/* 모바일 디바이스 (480px 이하) */
 @media screen and (max-width: 480px) {
   #miniscreen {
     left: 5%;
@@ -174,14 +555,12 @@
   }
 
   .button-with-icon {
-    min-width: 28px;
-    min-height: 28px;
-    padding: 4px;
-    font-size: 12px;
+    width: 28px;
+    height: 28px;
+    font-size: 10px;
   }
 }
 
-/* 매우 작은 화면 (320px 이하) */
 @media screen and (max-width: 320px) {
   #miniscreen {
     left: 2.5%;
@@ -204,18 +583,15 @@
   }
 
   .button-with-icon {
-    min-width: 26px;
-    min-height: 26px;
-    padding: 3px;
-    font-size: 11px;
+    width: 26px;
+    height: 26px;
+    font-size: 10px;
   }
 }
 
-/* 가로 모드 대응 */
 @media screen and (max-height: 600px) {
   #miniscreen {
     height: 90%;
     min-height: 300px;
   }
 }
-

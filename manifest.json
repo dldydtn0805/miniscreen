@@ -12,6 +12,12 @@
     {
       "matches": ["<all_urls>"],
       "css": ["styles.css"]
+    },
+    {
+      "matches": ["<all_urls>"],
+      "js": ["frame-tracker.js"],
+      "all_frames": true,
+      "run_at": "document_idle"
     }
   ],
   "action": {

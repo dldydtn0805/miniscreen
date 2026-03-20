@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MINISCREEN Demo Host</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <style>
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        color: #f8fafc;
+        background:
+          radial-gradient(circle at top left, rgba(34, 197, 94, 0.22), transparent 30%),
+          radial-gradient(circle at 85% 15%, rgba(59, 130, 246, 0.28), transparent 28%),
+          linear-gradient(180deg, #0f172a 0%, #111827 55%, #020617 100%);
+        overflow: hidden;
+      }
+
+      .layout {
+        padding: 48px;
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        padding: 8px 12px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.08);
+        font-size: 12px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        margin: 20px 0 12px;
+        max-width: 720px;
+        font-size: 64px;
+        line-height: 1;
+        letter-spacing: -0.05em;
+      }
+
+      p {
+        max-width: 620px;
+        margin: 0;
+        color: rgba(248, 250, 252, 0.76);
+        font-size: 18px;
+        line-height: 1.6;
+      }
+
+      .cards {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 18px;
+        margin-top: 40px;
+        max-width: 900px;
+      }
+
+      .card {
+        padding: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 24px;
+        background: rgba(255, 255, 255, 0.06);
+        box-shadow: 0 18px 48px rgba(0, 0, 0, 0.22);
+        backdrop-filter: blur(18px);
+      }
+
+      .card strong {
+        display: block;
+        margin-bottom: 8px;
+        font-size: 18px;
+      }
+
+      .card span {
+        color: rgba(248, 250, 252, 0.7);
+        font-size: 14px;
+        line-height: 1.5;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="layout">
+      <div class="eyebrow">MINISCREEN Showcase</div>
+      <h1>Keep a second web view open without leaving the page.</h1>
+      <p>
+        This host page exists only for screenshot generation. The floating panel is
+        rendered by the current MINISCREEN UI code.
+      </p>
+      <div class="cards">
+        <div class="card">
+          <strong>Responsive QA</strong>
+          <span>Preview a mobile rendering while keeping the desktop page visible.</span>
+        </div>
+        <div class="card">
+          <strong>Research</strong>
+          <span>Open a reference page beside your working context instead of tab hopping.</span>
+        </div>
+        <div class="card">
+          <strong>Bookmarks</strong>
+          <span>Save common destinations and reopen them from the panel quickly.</span>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const params = new URLSearchParams(window.location.search);
+      const initialViewMode = params.get("mode") === "desktop" ? "desktop" : "mobile";
+
+      const storageState = {
+        home: "http://127.0.0.1:4173/.codex-demo/frame.html",
+        viewMode: initialViewMode,
+        bookmarks: [
+          {
+            title: "Product Notes",
+            url: "http://127.0.0.1:4173/.codex-demo/frame.html",
+          },
+          {
+            title: "Roadmap",
+            url: "http://127.0.0.1:4173/.codex-demo/frame-alt.html",
+          },
+        ],
+      };
+
+      window.chrome = {
+        storage: {
+          sync: {
+            get(keys, callback) {
+              if (Array.isArray(keys)) {
+                const result = {};
+                keys.forEach((key) => {
+                  result[key] = storageState[key];
+                });
+                callback(result);
+                return;
+              }
+
+              if (typeof keys === "string") {
+                callback({ [keys]: storageState[keys] });
+                return;
+              }
+
+              callback({ ...storageState });
+            },
+            set(values, callback = () => {}) {
+              Object.assign(storageState, values);
+              callback();
+            },
+          },
+        },
+        runtime: {
+          lastError: null,
+          sendMessage(message, callback = () => {}) {
+            if (message?.type === "MINISCREEN_SET_VIEW_MODE") {
+              storageState.viewMode =
+                message.viewMode === "desktop" ? "desktop" : "mobile";
+              callback({ ok: true, viewMode: storageState.viewMode });
+              return;
+            }
+
+            callback({ ok: true });
+          },
+        },
+      };
+    </script>
+    <script src="/content.js"></script>
+    <script src="/.codex-demo/capture.js"></script>
+  </body>
+</html>
