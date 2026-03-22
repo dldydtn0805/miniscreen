@@ -8,10 +8,12 @@
     miniScreen.innerHTML = `
       <div class="mini-screen-header">
         <button id="close-button" class="button-with-icon">X</button>
-        <button id="back-button" class="button-with-icon"><</button>
+        <div class="nav-button-group">
+          <button id="back-button" class="button-with-icon"><</button>
+          <button id="go-button" class="button-with-icon">></button>
+        </div>
+        <input type="text" id="url-input">
         <button id="home-button" class="button-with-icon">⌂</button>
-        <input type="text" id="url-input" placeholder="SEARCH WORD OR URL">
-        <button id="go-button" class="button-with-icon">></button>
         <button id="bookmark-button" class="button-with-icon">★</button>
         <button id="view-mode-button" class="button-with-icon" type="button">M</button>
       </div>
@@ -20,7 +22,6 @@
           <div class="bookmark-panel-heading">
             <span class="bookmark-panel-eyebrow">Library</span>
             <strong>Bookmarks</strong>
-            <p class="bookmark-panel-copy">Keep your favorite pages close and open them in one tap.</p>
           </div>
           <button id="add-bookmark-button" type="button" aria-label="Add current page">+</button>
         </div>

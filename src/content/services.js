@@ -11,6 +11,7 @@
       navigateTo(targetUrl) {
         appState.currentUrl = targetUrl;
         appState.currentTitle = getBookmarkTitle(targetUrl);
+        elements.urlInput.value = targetUrl;
         elements.iframe.src = targetUrl;
       },
 
@@ -58,6 +59,7 @@
       openBookmark(bookmark) {
         appState.currentUrl = bookmark.url;
         appState.currentTitle = bookmark.title;
+        elements.urlInput.value = bookmark.url;
         elements.iframe.src = bookmark.url;
         elements.bookmarkPanel.classList.add("hidden");
         elements.bookmarkButton.classList.remove("is-active");
@@ -83,6 +85,32 @@
         );
         await storage.saveBookmarks(appState.bookmarks);
         return appState.bookmarks;
+      },
+
+      async reorderBookmarks(fromIndex, toIndex) {
+        if (
+          fromIndex === toIndex ||
+          fromIndex < 0 ||
+          toIndex < 0 ||
+          fromIndex >= appState.bookmarks.length ||
+          toIndex > appState.bookmarks.length
+        ) {
+          return false;
+        }
+
+        const nextBookmarks = [...appState.bookmarks];
+        const [movedBookmark] = nextBookmarks.splice(fromIndex, 1);
+        const normalizedTargetIndex =
+          fromIndex < toIndex ? toIndex - 1 : toIndex;
+
+        if (!movedBookmark || normalizedTargetIndex === fromIndex) {
+          return false;
+        }
+
+        nextBookmarks.splice(normalizedTargetIndex, 0, movedBookmark);
+        appState.bookmarks = nextBookmarks;
+        await storage.saveBookmarks(appState.bookmarks);
+        return true;
       },
 
       async addCurrentBookmark() {

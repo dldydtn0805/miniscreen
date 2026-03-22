@@ -4,6 +4,52 @@
 
   function createLayoutController(context) {
     const { elements, appState } = context;
+    const inputDragThreshold = 6;
+    let restoredBounds = null;
+
+    const createFrameScheduler = (applyStyles) => {
+      let frameId = 0;
+      let pendingStyles = null;
+
+      const flush = () => {
+        frameId = 0;
+
+        if (!pendingStyles) {
+          return;
+        }
+
+        const nextStyles = pendingStyles;
+        pendingStyles = null;
+        applyStyles(nextStyles);
+      };
+
+      return {
+        schedule(nextStyles) {
+          pendingStyles = nextStyles;
+
+          if (frameId) {
+            return;
+          }
+
+          frameId = window.requestAnimationFrame(flush);
+        },
+
+        flush() {
+          if (!pendingStyles) {
+            return;
+          }
+
+          if (frameId) {
+            window.cancelAnimationFrame(frameId);
+            frameId = 0;
+          }
+
+          const nextStyles = pendingStyles;
+          pendingStyles = null;
+          applyStyles(nextStyles);
+        },
+      };
+    };
 
     const getSizeConstraints = () => {
       const margin = 12;
@@ -29,6 +75,10 @@
     };
 
     const constrainMiniScreenToViewport = () => {
+      if (appState.isFullscreen) {
+        return;
+      }
+
       const { margin, minWidth, minHeight, maxWidth, maxHeight } =
         getSizeConstraints();
       const currentRect = elements.miniScreen.getBoundingClientRect();
@@ -66,24 +116,143 @@
       elements.miniScreen.style.transform = "none";
     };
 
+    const syncFullscreenToViewport = () => {
+      elements.miniScreen.classList.add("is-fullscreen");
+      elements.miniScreen.style.left = "0px";
+      elements.miniScreen.style.top = "0px";
+      elements.miniScreen.style.width = `${window.innerWidth}px`;
+      elements.miniScreen.style.height = `${window.innerHeight}px`;
+      elements.miniScreen.style.bottom = "auto";
+      elements.miniScreen.style.transform = "none";
+    };
+
+    const toggleFullscreen = () => {
+      if (appState.isFullscreen) {
+        appState.isFullscreen = false;
+        elements.miniScreen.classList.remove("is-fullscreen");
+
+        if (restoredBounds) {
+          elements.miniScreen.style.left = `${restoredBounds.left}px`;
+          elements.miniScreen.style.top = `${restoredBounds.top}px`;
+          elements.miniScreen.style.width = `${restoredBounds.width}px`;
+          elements.miniScreen.style.height = `${restoredBounds.height}px`;
+          elements.miniScreen.style.bottom = "auto";
+          elements.miniScreen.style.transform = "none";
+          restoredBounds = null;
+          constrainMiniScreenToViewport();
+          return false;
+        }
+
+        resetMiniScreenPosition();
+        constrainMiniScreenToViewport();
+        return false;
+      }
+
+      const currentRect = elements.miniScreen.getBoundingClientRect();
+      restoredBounds = {
+        left: currentRect.left,
+        top: currentRect.top,
+        width: currentRect.width,
+        height: currentRect.height,
+      };
+
+      appState.isFullscreen = true;
+      syncFullscreenToViewport();
+      return true;
+    };
+
+    const startDragInteraction = (startClientX, startClientY) => {
+      elements.miniScreen.classList.add("is-interacting");
+
+      const currentRect = elements.miniScreen.getBoundingClientRect();
+      elements.miniScreen.style.left = `${currentRect.left}px`;
+      elements.miniScreen.style.top = `${currentRect.top}px`;
+      elements.miniScreen.style.bottom = "auto";
+      elements.miniScreen.style.transform = "none";
+
+      return {
+        offsetX: startClientX - currentRect.left,
+        offsetY: startClientY - currentRect.top,
+        frameScheduler: createFrameScheduler(({ left, top }) => {
+          elements.miniScreen.style.left = `${left}px`;
+          elements.miniScreen.style.top = `${top}px`;
+        }),
+      };
+    };
+
+    const finishDragInteraction = (dragSession) => {
+      if (!dragSession) {
+        return;
+      }
+
+      dragSession.frameScheduler.flush();
+      elements.miniScreen.classList.remove("is-interacting");
+      constrainMiniScreenToViewport();
+    };
+
+    const isInteractiveHeaderTarget = (target) =>
+      target instanceof Element && target.closest("button, input") !== null;
+
     const bindDrag = () => {
       elements.header.addEventListener("mousedown", (event) => {
-        elements.miniScreen.classList.add("is-interacting");
-        const currentRect = elements.miniScreen.getBoundingClientRect();
-        elements.miniScreen.style.left = `${currentRect.left}px`;
-        elements.miniScreen.style.top = `${currentRect.top}px`;
-        elements.miniScreen.style.transform = "none";
-        const offsetX = event.clientX - currentRect.left;
-        const offsetY = event.clientY - currentRect.top;
+        if (
+          event.button !== 0 ||
+          appState.isFullscreen ||
+          isInteractiveHeaderTarget(event.target)
+        ) {
+          return;
+        }
+
+        event.preventDefault();
+        const dragSession = startDragInteraction(event.clientX, event.clientY);
 
         const onMouseMove = (moveEvent) => {
-          elements.miniScreen.style.left = `${moveEvent.clientX - offsetX}px`;
-          elements.miniScreen.style.top = `${moveEvent.clientY - offsetY}px`;
+          dragSession.frameScheduler.schedule({
+            left: moveEvent.clientX - dragSession.offsetX,
+            top: moveEvent.clientY - dragSession.offsetY,
+          });
         };
 
         const onMouseUp = () => {
-          elements.miniScreen.classList.remove("is-interacting");
-          constrainMiniScreenToViewport();
+          finishDragInteraction(dragSession);
+          document.removeEventListener("mousemove", onMouseMove);
+          document.removeEventListener("mouseup", onMouseUp);
+        };
+
+        document.addEventListener("mousemove", onMouseMove);
+        document.addEventListener("mouseup", onMouseUp);
+      });
+
+      elements.urlInput.addEventListener("mousedown", (event) => {
+        if (event.button !== 0 || appState.isFullscreen) {
+          return;
+        }
+
+        const startClientX = event.clientX;
+        const startClientY = event.clientY;
+        let dragSession = null;
+
+        const onMouseMove = (moveEvent) => {
+          if (!dragSession) {
+            const deltaX = moveEvent.clientX - startClientX;
+            const deltaY = moveEvent.clientY - startClientY;
+
+            if (Math.hypot(deltaX, deltaY) < inputDragThreshold) {
+              return;
+            }
+
+            elements.urlInput.blur();
+            dragSession = startDragInteraction(startClientX, startClientY);
+          }
+
+          dragSession.frameScheduler.schedule({
+            left: moveEvent.clientX - dragSession.offsetX,
+            top: moveEvent.clientY - dragSession.offsetY,
+          });
+        };
+
+        const onMouseUp = () => {
+          finishDragInteraction(dragSession);
           document.removeEventListener("mousemove", onMouseMove);
           document.removeEventListener("mouseup", onMouseUp);
         };
@@ -95,6 +264,10 @@
 
     const bindResize = () => {
       elements.resizeHandle.addEventListener("mousedown", (event) => {
+        if (appState.isFullscreen) {
+          return;
+        }
+
         event.preventDefault();
         event.stopPropagation();
         elements.miniScreen.classList.add("is-interacting");
@@ -104,6 +277,10 @@
         const startX = event.clientX;
         const startY = event.clientY;
         const { minWidth, minHeight, maxWidth, maxHeight } = getSizeConstraints();
+        const frameScheduler = createFrameScheduler(({ width, height }) => {
+          elements.miniScreen.style.width = `${width}px`;
+          elements.miniScreen.style.height = `${height}px`;
+        });
 
         const onMouseMove = (moveEvent) => {
           const nextWidth = Math.min(
@@ -115,11 +292,14 @@
             maxHeight
           );
 
-          elements.miniScreen.style.width = `${nextWidth}px`;
-          elements.miniScreen.style.height = `${nextHeight}px`;
+          frameScheduler.schedule({
+            width: nextWidth,
+            height: nextHeight,
+          });
         };
 
         const onMouseUp = () => {
+          frameScheduler.flush();
           elements.miniScreen.classList.remove("is-interacting");
           constrainMiniScreenToViewport();
           document.removeEventListener("mousemove", onMouseMove);
@@ -137,6 +317,8 @@
     return {
       constrainMiniScreenToViewport,
       resetMiniScreenPosition,
+      syncFullscreenToViewport,
+      toggleFullscreen,
     };
   }
 

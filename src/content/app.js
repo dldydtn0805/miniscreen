@@ -1,6 +1,14 @@
 (function () {
   const state = (globalThis.MINISCREEN_CONTENT =
     globalThis.MINISCREEN_CONTENT || {});
+  const FRAME_NAVIGATE_BACK_MESSAGE = "MINISCREEN_FRAME_NAVIGATE_BACK";
+
+  if (
+    typeof state.destroyMiniScreen === "function" &&
+    !document.getElementById("miniscreen")
+  ) {
+    state.destroyMiniScreen();
+  }
 
   if (document.getElementById("miniscreen")) {
     return;
@@ -14,10 +22,15 @@
     currentTitle: getBookmarkTitle(fallbackHomeUrl),
     currentUrl: fallbackHomeUrl,
     currentViewMode: defaultViewMode,
+    isFullscreen: false,
     isComposing: false,
   };
 
   const layout = state.layout.createLayoutController({ elements, appState });
+  const listenerController = new AbortController();
+  const listenerOptions = { signal: listenerController.signal };
+  let isDestroyed = false;
+  let resizeFrameId = 0;
 
   const applyViewMode = (viewMode) => {
     appState.currentViewMode = viewMode === "desktop" ? "desktop" : "mobile";
@@ -47,6 +60,12 @@
   });
   document.body.appendChild(elements.miniScreen);
 
+  const selectAllUrlInputText = () => {
+    window.requestAnimationFrame(() => {
+      elements.urlInput.select();
+    });
+  };
+
   const navigateToInputValue = () => {
     if (!elements.urlInput.value) {
       services.loadHome();
@@ -54,12 +73,41 @@
     }
 
     const targetUrl = normalizeTargetUrl(elements.urlInput.value);
-    elements.urlInput.value = "";
     services.navigateTo(targetUrl);
   };
 
+  const destroyMiniScreen = () => {
+    if (isDestroyed) {
+      return;
+    }
+
+    isDestroyed = true;
+
+    if (resizeFrameId) {
+      window.cancelAnimationFrame(resizeFrameId);
+      resizeFrameId = 0;
+    }
+
+    listenerController.abort();
+
+    if (elements.iframe.src && elements.iframe.src !== "about:blank") {
+      elements.iframe.src = "about:blank";
+    }
+
+    elements.miniScreen.remove();
+
+    if (state.destroyMiniScreen === destroyMiniScreen) {
+      delete state.destroyMiniScreen;
+    }
+  };
+
+  state.destroyMiniScreen = destroyMiniScreen;
+
   elements.backButton.addEventListener("click", () => {
-    window.history.back();
+    elements.iframe.contentWindow?.postMessage(
+      { type: FRAME_NAVIGATE_BACK_MESSAGE },
+      "*"
+    );
   });
 
   elements.goButton.addEventListener("click", navigateToInputValue);
@@ -75,7 +123,6 @@
       ? normalizeTargetUrl(elements.urlInput.value)
       : appState.currentUrl;
 
-    elements.urlInput.value = "";
     await services.saveHome(targetUrl);
   });
 
@@ -91,20 +138,42 @@
     await bookmarkStore.addCurrentBookmark();
   });
 
-  document.addEventListener("mousedown", (event) => {
-    if (
-      !elements.bookmarkPanel.classList.contains("hidden") &&
-      !elements.bookmarkPanel.contains(event.target) &&
-      !elements.bookmarkButton.contains(event.target)
-    ) {
-      elements.bookmarkPanel.classList.add("hidden");
-      elements.bookmarkButton.classList.remove("is-active");
-    }
-  });
+  document.addEventListener(
+    "mousedown",
+    (event) => {
+      if (
+        !elements.bookmarkPanel.classList.contains("hidden") &&
+        !elements.bookmarkPanel.contains(event.target) &&
+        !elements.bookmarkButton.contains(event.target)
+      ) {
+        elements.bookmarkPanel.classList.add("hidden");
+        elements.bookmarkButton.classList.remove("is-active");
+      }
+    },
+    listenerOptions
+  );
 
-  window.addEventListener("resize", () => {
-    layout.resetMiniScreenPosition();
-  });
+  window.addEventListener(
+    "resize",
+    () => {
+      if (resizeFrameId) {
+        return;
+      }
+
+      resizeFrameId = window.requestAnimationFrame(() => {
+        resizeFrameId = 0;
+
+        if (appState.isFullscreen) {
+          layout.syncFullscreenToViewport();
+          return;
+        }
+
+        layout.resetMiniScreenPosition();
+        layout.constrainMiniScreenToViewport();
+      });
+    },
+    listenerOptions
+  );
 
   elements.urlInput.addEventListener("compositionstart", () => {
     appState.isComposing = true;
@@ -114,6 +183,14 @@
     appState.isComposing = false;
   });
 
+  elements.urlInput.addEventListener("focus", () => {
+    selectAllUrlInputText();
+  });
+
+  elements.urlInput.addEventListener("click", () => {
+    selectAllUrlInputText();
+  });
+
   elements.urlInput.addEventListener("keydown", (event) => {
     if (event.key === "Enter" && !appState.isComposing) {
       event.preventDefault();
@@ -121,8 +198,14 @@
     }
   });
 
+  elements.urlInput.addEventListener("dblclick", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    layout.toggleFullscreen();
+  });
+
   elements.closeButton.addEventListener("click", () => {
-    elements.miniScreen.remove();
+    destroyMiniScreen();
   });
 
   elements.viewModeButton.addEventListener("click", async () => {
@@ -139,18 +222,27 @@
       appState.currentUrl = elements.iframe.src || appState.currentUrl;
       appState.currentTitle = getBookmarkTitle(appState.currentUrl);
     }
+
+    elements.urlInput.value = appState.currentUrl;
   });
 
-  window.addEventListener("message", (event) => {
-    if (
-      event.source === elements.iframe.contentWindow &&
-      event.data?.type === "MINISCREEN_FRAME_URL"
-    ) {
-      appState.currentUrl = event.data.href || appState.currentUrl;
-      appState.currentTitle =
-        event.data.title || getBookmarkTitle(appState.currentUrl);
-    }
-  });
+  window.addEventListener(
+    "message",
+    (event) => {
+      if (
+        event.source === elements.iframe.contentWindow &&
+        event.data?.type === "MINISCREEN_FRAME_URL"
+      ) {
+        appState.currentUrl = event.data.href || appState.currentUrl;
+        appState.currentTitle =
+          event.data.title || getBookmarkTitle(appState.currentUrl);
+        elements.urlInput.value = appState.currentUrl;
+      }
+    },
+    listenerOptions
+  );
+
+  window.addEventListener("pagehide", destroyMiniScreen, listenerOptions);
 
   services.loadViewMode();
 

@@ -5,6 +5,35 @@
   function createBookmarkStore(context) {
     const { elements, appState, services } = context;
     let editingBookmarkIndex = null;
+    let draggingBookmarkIndex = null;
+    let dragOverBookmarkIndex = null;
+    let dragOverPosition = null;
+
+    const syncDragStateClasses = () => {
+      Array.from(elements.bookmarkList.children).forEach((item, index) => {
+        item.classList.toggle("is-dragging", index === draggingBookmarkIndex);
+        item.classList.toggle(
+          "drop-before",
+          index === dragOverBookmarkIndex && dragOverPosition === "before"
+        );
+        item.classList.toggle(
+          "drop-after",
+          index === dragOverBookmarkIndex && dragOverPosition === "after"
+        );
+      });
+    };
+
+    const resetDragState = () => {
+      draggingBookmarkIndex = null;
+      dragOverBookmarkIndex = null;
+      dragOverPosition = null;
+      syncDragStateClasses();
+    };
+
+    const getDropPosition = (item, clientY) => {
+      const { top, height } = item.getBoundingClientRect();
+      return clientY < top + height / 2 ? "before" : "after";
+    };
 
     const renderBookmarks = () => {
       elements.bookmarkList.innerHTML = "";
@@ -15,6 +44,7 @@
       appState.bookmarks.forEach((bookmark, index) => {
         const item = document.createElement("div");
         item.className = "bookmark-item";
+        item.draggable = editingBookmarkIndex === null;
 
         const saveBookmarkTitle = async (nextTitle) => {
           const saved = await services.renameBookmark(index, nextTitle);
@@ -72,9 +102,68 @@
           return;
         }
 
+        item.addEventListener("dragstart", (event) => {
+          if (editingBookmarkIndex !== null) {
+            event.preventDefault();
+            return;
+          }
+
+          draggingBookmarkIndex = index;
+          dragOverBookmarkIndex = null;
+          dragOverPosition = null;
+
+          if (event.dataTransfer) {
+            event.dataTransfer.effectAllowed = "move";
+            event.dataTransfer.setData("text/plain", String(index));
+          }
+
+          syncDragStateClasses();
+        });
+
+        item.addEventListener("dragover", (event) => {
+          if (draggingBookmarkIndex === null || draggingBookmarkIndex === index) {
+            return;
+          }
+
+          event.preventDefault();
+          dragOverBookmarkIndex = index;
+          dragOverPosition = getDropPosition(item, event.clientY);
+
+          if (event.dataTransfer) {
+            event.dataTransfer.dropEffect = "move";
+          }
+
+          syncDragStateClasses();
+        });
+
+        item.addEventListener("drop", async (event) => {
+          if (draggingBookmarkIndex === null) {
+            return;
+          }
+
+          event.preventDefault();
+
+          const dropPosition = getDropPosition(item, event.clientY);
+          const didReorder = await services.reorderBookmarks(
+            draggingBookmarkIndex,
+            dropPosition === "before" ? index : index + 1
+          );
+
+          resetDragState();
+
+          if (didReorder) {
+            renderBookmarks();
+          }
+        });
+
+        item.addEventListener("dragend", () => {
+          resetDragState();
+        });
+
         const openButton = document.createElement("button");
         openButton.type = "button";
         openButton.className = "bookmark-link";
+        openButton.draggable = false;
         openButton.textContent = bookmark.title;
         openButton.title = bookmark.url;
         openButton.addEventListener("click", () => {
@@ -84,6 +173,7 @@
         const removeButton = document.createElement("button");
         removeButton.type = "button";
         removeButton.className = "bookmark-remove";
+        removeButton.draggable = false;
         removeButton.textContent = "-";
         removeButton.setAttribute("aria-label", "Remove bookmark");
         removeButton.addEventListener("click", async () => {
@@ -94,6 +184,7 @@
         const editButton = document.createElement("button");
         editButton.type = "button";
         editButton.className = "bookmark-edit";
+        editButton.draggable = false;
         editButton.textContent = "✎";
         editButton.setAttribute("aria-label", "Rename bookmark");
         editButton.addEventListener("click", () => {
@@ -106,7 +197,62 @@
         item.appendChild(removeButton);
         elements.bookmarkList.appendChild(item);
       });
+
+      syncDragStateClasses();
     };
+
+    elements.bookmarkList.addEventListener("dragover", (event) => {
+      if (draggingBookmarkIndex === null) {
+        return;
+      }
+
+      event.preventDefault();
+
+      const lastBookmarkItem =
+        elements.bookmarkList.lastElementChild instanceof HTMLElement
+          ? elements.bookmarkList.lastElementChild
+          : null;
+
+      if (!lastBookmarkItem) {
+        return;
+      }
+
+      const { bottom } = lastBookmarkItem.getBoundingClientRect();
+
+      if (event.clientY >= bottom) {
+        dragOverBookmarkIndex = appState.bookmarks.length - 1;
+        dragOverPosition = "after";
+        syncDragStateClasses();
+      }
+    });
+
+    elements.bookmarkList.addEventListener("drop", async (event) => {
+      if (draggingBookmarkIndex === null) {
+        return;
+      }
+
+      const targetItem =
+        event.target instanceof Element
+          ? event.target.closest(".bookmark-item")
+          : null;
+
+      if (targetItem) {
+        return;
+      }
+
+      event.preventDefault();
+
+      const didReorder = await services.reorderBookmarks(
+        draggingBookmarkIndex,
+        appState.bookmarks.length
+      );
+
+      resetDragState();
+
+      if (didReorder) {
+        renderBookmarks();
+      }
+    });
 
     return {
       renderBookmarks,
