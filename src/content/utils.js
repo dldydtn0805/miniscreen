@@ -2,6 +2,7 @@
   const state = (globalThis.MINISCREEN_CONTENT =
     globalThis.MINISCREEN_CONTENT || {});
   const { fallbackHomeUrl, searchUrl } = state.constants;
+  const FRAME_NAME_MUTED_PATTERN = /(?:^|\s)__MINISCREEN_MUTED__=[01](?=\s|$)/g;
 
   state.utils = {
     normalizeTargetUrl(rawValue) {
@@ -25,6 +26,18 @@
       } catch (error) {
         return url;
       }
+    },
+
+    updateFrameNameMutedState(frameName, isMuted) {
+      const sanitizedFrameName =
+        typeof frameName === "string" ? frameName : String(frameName || "");
+      const baseFrameName = sanitizedFrameName
+        .replace(FRAME_NAME_MUTED_PATTERN, "")
+        .trim();
+
+      return `${baseFrameName}${baseFrameName ? " " : ""}__MINISCREEN_MUTED__=${
+        isMuted ? "1" : "0"
+      }`;
     },
   };
 })();

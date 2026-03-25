@@ -13,6 +13,19 @@
           <button id="go-button" class="button-with-icon">></button>
         </div>
         <input type="text" id="url-input">
+        <button id="mute-button" class="button-with-icon" type="button" aria-label="Mute iframe audio">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M5 9v6h4l5 4V5l-5 4H5z"></path>
+            <path
+              class="mute-button-slash"
+              d="M6 6l12 12"
+              fill="none"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-width="2"
+            ></path>
+          </svg>
+        </button>
         <button id="home-button" class="button-with-icon">⌂</button>
         <button id="bookmark-button" class="button-with-icon">★</button>
         <button id="view-mode-button" class="button-with-icon" type="button">M</button>
@@ -47,6 +60,7 @@
       iframe: miniScreen.querySelector("#mini-iframe"),
       header: miniScreen.querySelector(".mini-screen-header"),
       homeButton: miniScreen.querySelector("#home-button"),
+      muteButton: miniScreen.querySelector("#mute-button"),
       resizeHandle: miniScreen.querySelector("#resize-handle"),
     };
   }

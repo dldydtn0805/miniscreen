@@ -3,6 +3,7 @@
     globalThis.MINISCREEN_CONTENT || {});
   const FRAME_NAVIGATE_BACK_MESSAGE = "MINISCREEN_FRAME_NAVIGATE_BACK";
   const FRAME_APPLY_FONT_MESSAGE = "MINISCREEN_FRAME_APPLY_FONT";
+  const FRAME_SET_MUTED_MESSAGE = "MINISCREEN_FRAME_SET_MUTED";
 
   if (
     typeof state.destroyMiniScreen === "function" &&
@@ -16,13 +17,15 @@
   }
 
   const { fallbackHomeUrl, defaultViewMode } = state.constants;
-  const { normalizeTargetUrl, getBookmarkTitle } = state.utils;
+  const { normalizeTargetUrl, getBookmarkTitle, updateFrameNameMutedState } =
+    state.utils;
   const elements = state.dom.createMiniScreen();
   const appState = {
     bookmarks: [],
     currentTitle: getBookmarkTitle(fallbackHomeUrl),
     currentUrl: fallbackHomeUrl,
     currentViewMode: defaultViewMode,
+    isMuted: false,
     isFullscreen: false,
     isComposing: false,
   };
@@ -46,6 +49,21 @@
     );
     elements.viewModeButton.title =
       appState.currentViewMode === "mobile" ? "Mobile view" : "Desktop web view";
+  };
+
+  const applyMuteState = (isMuted) => {
+    appState.isMuted = Boolean(isMuted);
+    elements.iframe.name = updateFrameNameMutedState(
+      elements.iframe.name,
+      appState.isMuted
+    );
+    elements.muteButton.classList.toggle("is-active", appState.isMuted);
+    elements.muteButton.setAttribute("aria-pressed", String(appState.isMuted));
+    elements.muteButton.setAttribute(
+      "aria-label",
+      appState.isMuted ? "Unmute iframe audio" : "Mute iframe audio"
+    );
+    elements.muteButton.title = appState.isMuted ? "Muted" : "Unmuted";
   };
 
   const services = state.services.createMiniScreenService({
@@ -113,6 +131,16 @@
     );
   };
 
+  const applyFrameMuteState = () => {
+    elements.iframe.contentWindow?.postMessage(
+      {
+        type: FRAME_SET_MUTED_MESSAGE,
+        muted: appState.isMuted,
+      },
+      "*"
+    );
+  };
+
   elements.backButton.addEventListener("click", () => {
     elements.iframe.contentWindow?.postMessage(
       { type: FRAME_NAVIGATE_BACK_MESSAGE },
@@ -124,6 +152,11 @@
 
   elements.homeButton.addEventListener("click", () => {
     services.loadHome();
+  });
+
+  elements.muteButton.addEventListener("click", () => {
+    applyMuteState(!appState.isMuted);
+    applyFrameMuteState();
   });
 
   elements.homeButton.addEventListener("contextmenu", async (event) => {
@@ -235,6 +268,7 @@
 
     elements.urlInput.value = appState.currentUrl;
     applyFrameFont();
+    applyFrameMuteState();
   });
 
   window.addEventListener(
@@ -255,6 +289,7 @@
 
   window.addEventListener("pagehide", destroyMiniScreen, listenerOptions);
 
+  applyMuteState(appState.isMuted);
   services.loadViewMode();
 
   bookmarkStore.loadBookmarks();

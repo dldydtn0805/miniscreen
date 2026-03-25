@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MINISCREEN Store Shot</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #eef1f7;
+        --panel: rgba(255, 255, 255, 0.78);
+        --text: #16181d;
+        --muted: #697180;
+        --line: rgba(18, 22, 32, 0.08);
+        --blue: #316cff;
+        --shadow: 0 30px 80px rgba(24, 35, 63, 0.16);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        width: 1280px;
+        height: 800px;
+        overflow: hidden;
+        font-family: "Apple SD Gothic Neo", "AppleGothic", sans-serif;
+        background:
+          radial-gradient(circle at top left, rgba(76, 132, 255, 0.16), transparent 36%),
+          radial-gradient(circle at bottom right, rgba(130, 173, 255, 0.18), transparent 28%),
+          linear-gradient(180deg, #f6f7fb 0%, #eceff6 100%);
+        color: var(--text);
+      }
+
+      .frame {
+        position: relative;
+        width: 1280px;
+        height: 800px;
+        padding: 48px 46px;
+      }
+
+      .headline {
+        position: absolute;
+        left: 58px;
+        top: 62px;
+        width: 440px;
+        z-index: 2;
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 14px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.72);
+        border: 1px solid rgba(255, 255, 255, 0.8);
+        color: #5072c7;
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        box-shadow: 0 12px 32px rgba(37, 52, 89, 0.08);
+      }
+
+      h1 {
+        margin: 18px 0 16px;
+        font-size: 54px;
+        line-height: 1.14;
+        letter-spacing: -0.04em;
+      }
+
+      .subcopy {
+        margin: 0;
+        font-size: 23px;
+        line-height: 1.58;
+        color: var(--muted);
+        letter-spacing: -0.02em;
+      }
+
+      .feature-list {
+        margin: 28px 0 0;
+        padding: 0;
+        list-style: none;
+        display: grid;
+        gap: 12px;
+      }
+
+      .feature-list li {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 18px;
+        color: #41485a;
+      }
+
+      .feature-list li::before {
+        content: "";
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #4f82ff, #7ca3ff);
+        box-shadow: 0 0 0 6px rgba(79, 130, 255, 0.12);
+        flex: none;
+      }
+
+      .device-wrap {
+        position: absolute;
+        right: 36px;
+        top: 20px;
+        width: 760px;
+        height: 760px;
+        display: grid;
+        place-items: center;
+      }
+
+      .device-shadow {
+        position: absolute;
+        inset: 28px 42px 20px 52px;
+        border-radius: 40px;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.44), rgba(255, 255, 255, 0.18));
+        filter: blur(30px);
+      }
+
+      .browser {
+        position: relative;
+        width: 708px;
+        height: 724px;
+        border-radius: 34px;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(248, 249, 252, 0.95));
+        border: 1px solid rgba(255, 255, 255, 0.9);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+      }
+
+      .browser-header {
+        height: 76px;
+        padding: 18px 18px 14px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(250, 251, 253, 0.78));
+      }
+
+      .circle-btn {
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        border: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.82);
+        display: grid;
+        place-items: center;
+        font-size: 16px;
+        color: #595e68;
+        font-weight: 700;
+        box-shadow: inset 0 -2px 6px rgba(26, 34, 53, 0.03);
+      }
+
+      .address {
+        flex: 1;
+        height: 52px;
+        border-radius: 28px;
+        border: 1px solid rgba(28, 34, 45, 0.08);
+        background: rgba(255, 255, 255, 0.88);
+        padding: 0 22px;
+        display: flex;
+        align-items: center;
+        font-size: 16px;
+        color: #2d3137;
+        box-shadow: inset 0 -3px 8px rgba(21, 26, 39, 0.04);
+      }
+
+      .address.small {
+        font-size: 15px;
+      }
+
+      .mode-btn {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        background: linear-gradient(180deg, #ffffff, #f5f7fb);
+        border: 1px solid rgba(20, 26, 39, 0.08);
+        color: #6a7282;
+        display: grid;
+        place-items: center;
+        font-size: 18px;
+        font-weight: 700;
+      }
+
+      .mode-btn.active {
+        color: #5a6476;
+      }
+
+      .browser-body {
+        position: relative;
+        height: calc(100% - 76px);
+        background: #fff;
+      }
+
+      .top-strip {
+        height: 84px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 20px 28px 0;
+      }
+
+      .tabs {
+        display: flex;
+        align-items: center;
+        gap: 22px;
+      }
+
+      .lab-icon {
+        font-size: 34px;
+        color: #666b75;
+      }
+
+      .tab {
+        position: relative;
+        padding-bottom: 14px;
+        font-size: 17px;
+        font-weight: 700;
+        color: #666b75;
+      }
+
+      .tab.active {
+        color: #225ccf;
+      }
+
+      .tab.active::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 4px;
+        border-radius: 999px;
+        background: #2d67df;
+      }
+
+      .top-icons {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        color: #5d6270;
+      }
+
+      .dot-grid {
+        width: 24px;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 3px;
+      }
+
+      .dot-grid span {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #525765;
+      }
+
+      .profile {
+        width: 54px;
+        height: 54px;
+        border-radius: 50%;
+        border: 2px solid #dfdfdf;
+        background:
+          radial-gradient(circle at 30% 30%, #ffd7c8 0 10%, transparent 11%),
+          radial-gradient(circle at 70% 30%, #ffd7c8 0 10%, transparent 11%),
+          linear-gradient(180deg, #ffffff, #f4f4f4);
+        position: relative;
+      }
+
+      .profile::before,
+      .profile::after {
+        content: "";
+        position: absolute;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #343741;
+        top: 18px;
+      }
+
+      .profile::before {
+        left: 15px;
+      }
+
+      .profile::after {
+        right: 15px;
+      }
+
+      .profile .mouth {
+        position: absolute;
+        left: 14px;
+        right: 14px;
+        bottom: 14px;
+        height: 8px;
+        border-bottom: 3px solid #343741;
+        border-radius: 0 0 999px 999px;
+      }
+
+      .hero-google {
+        margin-top: 92px;
+        text-align: center;
+        font-size: 76px;
+        font-weight: 700;
+        letter-spacing: -0.06em;
+        font-family: Arial, sans-serif;
+      }
+
+      .hero-google span:nth-child(1) { color: #4285f4; }
+      .hero-google span:nth-child(2) { color: #ea4335; }
+      .hero-google span:nth-child(3) { color: #fbbc05; }
+      .hero-google span:nth-child(4) { color: #4285f4; }
+      .hero-google span:nth-child(5) { color: #34a853; }
+      .hero-google span:nth-child(6) { color: #ea4335; }
+
+      .search-bar {
+        width: 88%;
+        margin: 36px auto 0;
+        height: 56px;
+        border-radius: 32px;
+        border: 1px solid #d8dbe2;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 24px;
+        color: #5e6470;
+        background: #fff;
+      }
+
+      .search-bar .left,
+      .search-bar .right {
+        display: flex;
+        align-items: center;
+        gap: 22px;
+      }
+
+      .search-icon {
+        width: 22px;
+        height: 22px;
+        border: 4px solid #666b75;
+        border-radius: 50%;
+        position: relative;
+      }
+
+      .search-icon::after {
+        content: "";
+        position: absolute;
+        width: 13px;
+        height: 4px;
+        background: #666b75;
+        right: -9px;
+        bottom: -5px;
+        transform: rotate(45deg);
+        border-radius: 999px;
+      }
+
+      .mic {
+        width: 10px;
+        height: 24px;
+        border-radius: 999px;
+        background: #5e6470;
+        position: relative;
+      }
+
+      .mic::before {
+        content: "";
+        position: absolute;
+        left: -8px;
+        right: -8px;
+        bottom: -7px;
+        height: 10px;
+        border: 3px solid #5e6470;
+        border-top: none;
+        border-radius: 0 0 16px 16px;
+      }
+
+      .camera {
+        width: 24px;
+        height: 20px;
+        border: 4px solid #5e6470;
+        border-radius: 8px;
+        position: relative;
+      }
+
+      .camera::before {
+        content: "";
+        position: absolute;
+        right: -8px;
+        top: 2px;
+        width: 6px;
+        height: 6px;
+        border: 3px solid #5e6470;
+        border-radius: 50%;
+      }
+
+      .footer-country {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 86px;
+        padding: 16px 24px;
+        font-size: 18px;
+        font-weight: 700;
+        color: #565b66;
+        border-top: 1px solid #d8dbe2;
+        background: #f5f5f6;
+      }
+
+      .footer-links {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 86px;
+        border-top: 1px solid #d8dbe2;
+        background: #f5f5f6;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 42px;
+        color: #565b66;
+        font-size: 18px;
+        font-weight: 700;
+      }
+
+      .bookmark-panel {
+        position: absolute;
+        top: 74px;
+        right: 32px;
+        width: 244px;
+        padding: 18px;
+        border-radius: 24px;
+        background: rgba(255, 255, 255, 0.94);
+        border: 1px solid rgba(23, 29, 41, 0.08);
+        box-shadow: 0 18px 42px rgba(26, 37, 64, 0.18);
+        display: none;
+      }
+
+      .bookmark-panel.show {
+        display: block;
+      }
+
+      .bookmark-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 14px;
+      }
+
+      .bookmark-head small {
+        display: block;
+        font-size: 11px;
+        color: #8b92a1;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+      }
+
+      .bookmark-head strong {
+        font-size: 26px;
+        letter-spacing: -0.05em;
+      }
+
+      .plus {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        background: #fff;
+        border: 1px solid rgba(23, 29, 41, 0.08);
+        font-weight: 700;
+      }
+
+      .bookmark-card {
+        border: 1px solid rgba(23, 29, 41, 0.08);
+        border-radius: 18px;
+        padding: 14px;
+        margin-top: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      .bookmark-pill {
+        flex: 1;
+        height: 44px;
+        border-radius: 999px;
+        background: linear-gradient(180deg, #ffffff, #f8f8fb);
+        border: 1px solid rgba(23, 29, 41, 0.06);
+        display: flex;
+        align-items: center;
+        padding: 0 14px;
+        color: #383f4b;
+        font-weight: 700;
+      }
+
+      .bookmark-actions {
+        display: flex;
+        gap: 8px;
+      }
+
+      .mini-btn {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: #fff;
+        border: 1px solid rgba(23, 29, 41, 0.08);
+      }
+
+      .mini-btn.delete {
+        position: relative;
+      }
+
+      .mini-btn.delete::before {
+        content: "";
+        position: absolute;
+        inset: 10px 7px;
+        border-top: 2px solid #ff6e63;
+      }
+
+      .chips {
+        position: absolute;
+        left: 30px;
+        right: 30px;
+        bottom: 182px;
+        display: grid;
+        gap: 14px;
+      }
+
+      .chip {
+        padding: 16px 18px;
+        border-radius: 18px;
+        background: #f4f7fe;
+        color: #4b66ac;
+        font-size: 15px;
+        font-weight: 700;
+      }
+
+      .floating-note {
+        position: absolute;
+        right: 58px;
+        top: 34px;
+        padding: 10px 16px;
+        border-radius: 999px;
+        background: rgba(49, 108, 255, 0.1);
+        color: #2d63da;
+        font-size: 13px;
+        font-weight: 800;
+        letter-spacing: 0.03em;
+        display: none;
+      }
+
+      .show-note .floating-note {
+        display: inline-flex;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="frame">
+      <section class="headline">
+        <div class="eyebrow">MINISCREEN CHROME EXTENSION</div>
+        <h1 id="title"></h1>
+        <p class="subcopy" id="copy"></p>
+        <ul class="feature-list">
+          <li id="point1"></li>
+          <li id="point2"></li>
+          <li id="point3"></li>
+        </ul>
+      </section>
+
+      <section class="device-wrap">
+        <div class="device-shadow"></div>
+        <div class="browser" id="browser">
+          <div class="floating-note" id="floatingNote"></div>
+          <header class="browser-header">
+            <div class="circle-btn">X</div>
+            <div class="circle-btn">&lt;</div>
+            <div class="circle-btn">&gt;</div>
+            <div class="address" id="addressBar"></div>
+            <div class="circle-btn">◀</div>
+            <div class="circle-btn">⌂</div>
+            <div class="circle-btn">★</div>
+            <div class="mode-btn active" id="modeButton">M</div>
+          </header>
+
+          <div class="browser-body">
+            <div class="top-strip">
+              <div class="tabs">
+                <div class="lab-icon">⚗</div>
+                <div class="tab active">전체</div>
+                <div class="tab">이미지</div>
+              </div>
+              <div class="top-icons">
+                <div class="dot-grid">
+                  <span></span><span></span><span></span>
+                  <span></span><span></span><span></span>
+                  <span></span><span></span><span></span>
+                </div>
+                <div class="profile">
+                  <div class="mouth"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="hero-google" aria-hidden="true">
+              <span>G</span><span>o</span><span>o</span><span>g</span><span>l</span><span>e</span>
+            </div>
+
+            <div class="search-bar">
+              <div class="left">
+                <div class="search-icon"></div>
+              </div>
+              <div class="right">
+                <div class="mic"></div>
+                <div class="camera"></div>
+              </div>
+            </div>
+
+            <div class="chips" id="chips"></div>
+            <div class="footer-country">대한민국</div>
+            <div class="footer-links">
+              <span>어두운 테마: 사용 중지됨</span>
+              <span>설정</span>
+              <span>개인정보처리방침</span>
+              <span>약관</span>
+            </div>
+
+            <div class="bookmark-panel" id="bookmarkPanel">
+              <div class="bookmark-head">
+                <div>
+                  <small>LIBRARY</small>
+                  <strong>Bookmarks</strong>
+                </div>
+                <div class="plus">+</div>
+              </div>
+              <div class="bookmark-card">
+                <div class="bookmark-pill">Product Notes</div>
+                <div class="bookmark-actions">
+                  <div class="mini-btn"></div>
+                  <div class="mini-btn delete"></div>
+                </div>
+              </div>
+              <div class="bookmark-card">
+                <div class="bookmark-pill">Roadmap</div>
+                <div class="bookmark-actions">
+                  <div class="mini-btn"></div>
+                  <div class="mini-btn delete"></div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <script>
+      const shots = {
+        overview: {
+          title: "현재 페이지 위에\n미니 브라우저를 띄우세요",
+          copy:
+            "MINISCREEN은 메인 탭을 벗어나지 않고도 작은 보조 화면으로 검색, 탐색, 비교 작업을 이어갈 수 있게 도와줍니다.",
+          points: [
+            "현재 페이지 흐름을 유지한 채 보조 탐색 가능",
+            "작업 중인 화면 위에 바로 띄우는 오버레이 UI",
+            "빠른 확인용 미니 브라우저 경험",
+          ],
+          address: "https://www.google.com/",
+          mode: "M",
+          chips: [
+            "페이지를 벗어나지 않고 필요한 정보를 바로 확인",
+            "반응형 확인, 자료 비교, 보조 탐색에 적합",
+            "작은 화면으로 빠르게 띄우고 바로 닫을 수 있음",
+          ],
+          note: "FLOATING WEB VIEW",
+          classes: ["show-note"],
+        },
+        search: {
+          title: "검색어와 URL을\n빠르게 전환하세요",
+          copy:
+            "주소 입력창 하나로 검색어와 웹주소를 모두 처리해 빠르게 이동할 수 있습니다. 뒤로가기와 홈 이동도 바로 사용할 수 있습니다.",
+          points: [
+            "검색어 입력 시 즉시 검색 페이지로 이동",
+            "URL 입력 시 바로 원하는 사이트 열기",
+            "뒤로가기, 홈 이동, 재탐색 흐름 지원",
+          ],
+          address: "https://www.google.com/",
+          mode: "M",
+          chips: [
+            "검색어와 URL을 구분해 빠르게 이동",
+            "바로가기 버튼으로 보조 탐색 속도 향상",
+            "메인 작업을 끊지 않는 빠른 정보 확인",
+          ],
+          note: "SMART ADDRESS BAR",
+          classes: ["show-note"],
+        },
+        bookmarks: {
+          title: "북마크로 자주 가는\n페이지를 저장하세요",
+          copy:
+            "미니 화면 안에서 자주 쓰는 페이지를 저장하고 다시 열 수 있습니다. 참고 자료나 반복 방문 페이지를 빠르게 불러오기에 좋습니다.",
+          points: [
+            "북마크 추가, 수정, 삭제 지원",
+            "자주 쓰는 페이지를 한곳에서 관리",
+            "반복 작업용 링크를 빠르게 재사용",
+          ],
+          address: "https://www.google.com/",
+          mode: "M",
+          chips: [
+            "필요한 링크를 미리 저장해 바로 열기",
+            "참고 문서와 작업 페이지를 빠르게 왕복",
+            "북마크 패널로 반복 탐색 부담 감소",
+          ],
+          note: "BOOKMARK PANEL",
+          classes: ["show-note"],
+          showBookmarks: true,
+        },
+        modes: {
+          title: "모바일과 데스크톱 뷰를\n상황에 맞게 전환하세요",
+          copy:
+            "작은 화면으로 모바일 레이아웃을 확인하거나, 더 넓은 화면으로 웹페이지를 탐색할 수 있습니다. 한 버튼으로 전환됩니다.",
+          points: [
+            "모바일 미리보기와 웹 뷰 전환 지원",
+            "반응형 점검이나 비교 작업에 유용",
+            "상황에 따라 더 좁게 또는 더 넓게 사용",
+          ],
+          address: "https://www.google.com/",
+          mode: "W",
+          chips: [
+            "모바일 체크와 일반 웹 탐색을 빠르게 전환",
+            "반응형 QA와 운영 확인에 모두 활용 가능",
+            "작업 맥락에 따라 화면 폭을 쉽게 변경",
+          ],
+          note: "VIEW MODE SWITCH",
+          classes: ["show-note"],
+        },
+        workflow: {
+          title: "작업 흐름을 끊지 않는\n보조 화면으로 활용하세요",
+          copy:
+            "문서, 검색 결과, 참고 페이지, 운영 화면을 옆에 두고 확인해야 할 때 MINISCREEN이 메인 작업 흐름을 유지해 줍니다.",
+          points: [
+            "리서치, QA, 운영 확인에 모두 활용 가능",
+            "메인 탭을 유지하면서 보조 정보 확인",
+            "작고 빠른 화면으로 비교 작업 부담 감소",
+          ],
+          address: "https://www.google.com/",
+          mode: "M",
+          chips: [
+            "작업 화면 위에 참고 자료를 띄워 비교",
+            "운영 화면과 검색 결과를 함께 확인",
+            "탭 전환을 줄여 더 빠르게 작업 진행",
+          ],
+          note: "KEEP YOUR FLOW",
+          classes: ["show-note"],
+        },
+      };
+
+      const params = new URLSearchParams(window.location.search);
+      const key = params.get("shot") || "overview";
+      const shot = shots[key] || shots.overview;
+
+      document.getElementById("title").innerHTML = shot.title.replaceAll("\n", "<br />");
+      document.getElementById("copy").textContent = shot.copy;
+      document.getElementById("point1").textContent = shot.points[0];
+      document.getElementById("point2").textContent = shot.points[1];
+      document.getElementById("point3").textContent = shot.points[2];
+      document.getElementById("addressBar").textContent = shot.address;
+      document.getElementById("modeButton").textContent = shot.mode;
+      document.getElementById("floatingNote").textContent = shot.note;
+
+      const chips = document.getElementById("chips");
+      shot.chips.forEach((chipText) => {
+        const chip = document.createElement("div");
+        chip.className = "chip";
+        chip.textContent = chipText;
+        chips.appendChild(chip);
+      });
+
+      if (shot.showBookmarks) {
+        document.getElementById("bookmarkPanel").classList.add("show");
+      }
+
+      shot.classes.forEach((className) => {
+        document.getElementById("browser").classList.add(className);
+      });
+    </script>
+  </body>
+</html>

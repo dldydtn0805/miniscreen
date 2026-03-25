@@ -2,16 +2,24 @@
   const state = (globalThis.MINISCREEN_CONTENT =
     globalThis.MINISCREEN_CONTENT || {});
   const { fallbackHomeUrl, maxBookmarks, defaultViewMode } = state.constants;
-  const { getBookmarkTitle } = state.utils;
+  const { getBookmarkTitle, updateFrameNameMutedState } = state.utils;
   const storage = state.storage;
   const runtime = state.runtime;
 
   function createMiniScreenService({ appState, elements, applyViewMode, layout }) {
+    const syncIframeMutedStateForNavigation = () => {
+      elements.iframe.name = updateFrameNameMutedState(
+        elements.iframe.name,
+        appState.isMuted
+      );
+    };
+
     return {
       navigateTo(targetUrl) {
         appState.currentUrl = targetUrl;
         appState.currentTitle = getBookmarkTitle(targetUrl);
         elements.urlInput.value = targetUrl;
+        syncIframeMutedStateForNavigation();
         elements.iframe.src = targetUrl;
       },
 
@@ -45,6 +53,7 @@
 
         applyViewMode(updatedViewMode);
         layout.constrainMiniScreenToViewport();
+        syncIframeMutedStateForNavigation();
         elements.iframe.src =
           appState.currentUrl || elements.iframe.src || fallbackHomeUrl;
 
@@ -60,6 +69,7 @@
         appState.currentUrl = bookmark.url;
         appState.currentTitle = bookmark.title;
         elements.urlInput.value = bookmark.url;
+        syncIframeMutedStateForNavigation();
         elements.iframe.src = bookmark.url;
         elements.bookmarkPanel.classList.add("hidden");
         elements.bookmarkButton.classList.remove("is-active");
