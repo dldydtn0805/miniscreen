@@ -2,7 +2,6 @@
   const state = (globalThis.MINISCREEN_CONTENT =
     globalThis.MINISCREEN_CONTENT || {});
   const FRAME_NAVIGATE_BACK_MESSAGE = "MINISCREEN_FRAME_NAVIGATE_BACK";
-  const FRAME_APPLY_FONT_MESSAGE = "MINISCREEN_FRAME_APPLY_FONT";
   const FRAME_SET_MUTED_MESSAGE = "MINISCREEN_FRAME_SET_MUTED";
 
   if (
@@ -121,15 +120,6 @@
   };
 
   state.destroyMiniScreen = destroyMiniScreen;
-
-  const applyFrameFont = () => {
-    elements.iframe.contentWindow?.postMessage(
-      {
-        type: FRAME_APPLY_FONT_MESSAGE,
-      },
-      "*"
-    );
-  };
 
   const applyFrameMuteState = () => {
     elements.iframe.contentWindow?.postMessage(
@@ -267,7 +257,6 @@
     }
 
     elements.urlInput.value = appState.currentUrl;
-    applyFrameFont();
     applyFrameMuteState();
   });
 
